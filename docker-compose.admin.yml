@@ -1,0 +1,74 @@
+# ============================================================
+# Admin Control Panel — Docker Compose
+#
+# Run alongside a main stack:
+#   docker compose -f docker/docker-compose.dev.yml \
+#                  -f docker-compose.admin.yml up
+#
+# Or standalone (requires an existing ascended-network):
+#   docker compose -f docker-compose.admin.yml up
+# ============================================================
+
+name: ascended-admin
+
+services:
+  # ── Admin Backend ─────────────────────────────────────────
+  admin-backend:
+    build:
+      context: ./admin/backend
+      dockerfile: Dockerfile
+    container_name: ascended-admin-backend
+    env_file: .env
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-dev}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ascended}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-ascended_dev}
+      REDIS_URL: redis://${REDIS_HOST:-redis}:6379
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      GATEWAY_URL: http://gateway:8000
+    ports:
+      - "${ADMIN_BACKEND_PORT:-8001}:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ascended-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/admin/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Admin Frontend ────────────────────────────────────────
+  admin-frontend:
+    build:
+      context: ./admin/frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${ADMIN_BACKEND_EXTERNAL_URL:-http://localhost:8001}
+    container_name: ascended-admin-frontend
+    ports:
+      - "${ADMIN_FRONTEND_PORT:-3001}:80"
+    depends_on:
+      admin-backend:
+        condition: service_healthy
+    networks:
+      - ascended-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  ascended-network:
+    external: true
+    name: ascended-network

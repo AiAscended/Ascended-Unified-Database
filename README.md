@@ -368,3 +368,55 @@ Kafka consumer lag-based scaling:
 ├── tools/validator/          # Validation tooling
 └── .github/workflows/        # CI/CD pipelines
 ```
+
+---
+
+## Admin Control Panel
+
+A full-featured administration portal sits alongside the gateway to manage every aspect of the stack from one UI.
+
+```bash
+# Start admin panel alongside dev stack
+docker compose \
+  -f docker/docker-compose.dev.yml \
+  -f docker-compose.admin.yml \
+  up -d
+```
+
+| Service | URL | Default Port |
+|---------|-----|-------------|
+| **Admin UI** | http://localhost:3001 | 3001 |
+| **Admin API** | http://localhost:8001/admin/api | 8001 |
+| **API Docs** | http://localhost:8001/admin/api/docs | — |
+| **WebSocket Metrics** | ws://localhost:8001/admin/ws/metrics | — |
+
+Features:
+- 🗄 **Database Management** — register, inspect, health-check, and table-manage every DB type
+- 👥 **User Management** — accounts, roles, activate/deactivate
+- 📈 **Live Metrics** — real-time CPU, memory, DB pool stats via WebSocket
+- 📋 **Audit Log** — full action history with export to CSV
+- ⚙️ **Settings** — enable/disable database providers at runtime
+- 🔌 **Embeddable** — the metrics API can be consumed by Grafana, Datadog, or any monitoring system
+
+---
+
+## Documentation
+
+Full enterprise documentation is in [`docs/`](./docs/README.md):
+
+| Section | Link |
+|---------|------|
+| Architecture | [docs/architecture/](./docs/architecture/README.md) |
+| Getting Started | [docs/getting-started/](./docs/getting-started/README.md) |
+| Data Gateway API | [docs/gateway/api-reference.md](./docs/gateway/api-reference.md) |
+| Admin Panel | [docs/admin/](./docs/admin/README.md) |
+| Admin API Reference | [docs/admin/api-reference.md](./docs/admin/api-reference.md) |
+| Database Stack | [docs/databases/](./docs/databases/README.md) |
+| Deployment (Docker) | [docs/deployment/docker-compose.md](./docs/deployment/docker-compose.md) |
+| Deployment (K8s) | [docs/deployment/kubernetes.md](./docs/deployment/kubernetes.md) |
+| CI/CD | [docs/cicd/](./docs/cicd/README.md) |
+| Security | [docs/security/](./docs/security/README.md) |
+| Observability | [docs/observability/](./docs/observability/README.md) |
+| Developer Guide | [docs/development/](./docs/development/README.md) |
+| Environment Variables | [docs/reference/environment-variables.md](./docs/reference/environment-variables.md) |
+| Glossary | [docs/reference/glossary.md](./docs/reference/glossary.md) |
