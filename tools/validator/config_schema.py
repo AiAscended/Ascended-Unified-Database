@@ -66,3 +66,31 @@ def validate_config(config: dict[str, Any]) -> list[str]:
                     errors.append(f"Missing gateway field: 'gateway.{field}'")
 
     return errors
+
+
+def validate_all_configs(root: "Path") -> list[str]:  # noqa: F821
+    """Scan all YAML files under root/configs/ and validate each one.
+
+    Returns a combined list of error strings prefixed with the file path.
+    """
+    from pathlib import Path
+    import yaml
+
+    errors: list[str] = []
+    configs_dir = Path(root) / "configs"
+    if not configs_dir.is_dir():
+        return []
+
+    for yaml_file in sorted(configs_dir.glob("*.yaml")):
+        try:
+            with yaml_file.open(encoding="utf-8") as fh:
+                data = yaml.safe_load(fh)
+        except Exception as exc:
+            errors.append(f"{yaml_file}: YAML parse error — {exc}")
+            continue
+
+        file_errors = validate_config(data or {})
+        for err in file_errors:
+            errors.append(f"{yaml_file}: {err}")
+
+    return errors

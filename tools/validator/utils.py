@@ -46,3 +46,62 @@ def relative(path: Path, root: Path) -> str:
         return str(path.relative_to(root))
     except ValueError:
         return str(path)
+
+
+# ---------------------------------------------------------------------------
+# Compatibility helpers used by validator.py
+# ---------------------------------------------------------------------------
+
+ANSI_RED = "\033[91m"
+ANSI_GREEN = "\033[92m"
+ANSI_YELLOW = "\033[93m"
+ANSI_RESET = "\033[0m"
+
+
+def _supports_color() -> bool:
+    return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+
+
+def red(text: str) -> str:
+    return f"{ANSI_RED}{text}{ANSI_RESET}" if _supports_color() else text
+
+
+def green(text: str) -> str:
+    return f"{ANSI_GREEN}{text}{ANSI_RESET}" if _supports_color() else text
+
+
+def yellow(text: str) -> str:
+    return f"{ANSI_YELLOW}{text}{ANSI_RESET}" if _supports_color() else text
+
+
+def find_files(root: Path, extensions: list[str]) -> list[Path]:
+    """Wrapper around collect_files that accepts a list of extensions."""
+    return collect_files(root, tuple(extensions))
+
+
+def get_repo_root() -> Path:
+    """Return the repository root by walking up from this file's location."""
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if (parent / ".git").exists():
+            return parent
+    return Path.cwd()
+
+
+def read_file(path: Path) -> str | None:
+    """Read a text file and return its contents, or None on error."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
+def print_issues(issues: list[str], check_name: str) -> None:
+    """Print a named set of validation issues."""
+    if issues:
+        print_section(f"{check_name} — {len(issues)} issue(s)")
+        for issue in issues:
+            print_fail(issue)
+    else:
+        print_section(check_name)
+        print_pass("No issues found.")
