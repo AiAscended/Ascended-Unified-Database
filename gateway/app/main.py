@@ -94,9 +94,6 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    cfg = load_config()
-    gw_cfg = cfg.get("gateway", {})
-
     app = FastAPI(
         title="Ascended Unified Database Gateway",
         description="Polyglot database orchestration platform",

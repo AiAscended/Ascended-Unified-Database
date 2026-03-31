@@ -92,7 +92,7 @@ async def consume_messages(
     messages: list[dict[str, Any]] = []
     try:
         records = await consumer.getmany(timeout_ms=timeout_ms, max_records=max_records)
-        for tp, batch in records.items():
+        for _tp, batch in records.items():
             for msg in batch:
                 messages.append({
                     "topic": msg.topic,

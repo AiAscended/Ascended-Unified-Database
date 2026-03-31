@@ -14,8 +14,6 @@ from ..providers import (
     qdrant_provider,
     neo4j_provider,
     clickhouse_provider,
-    kafka_provider,
-    minio_provider,
 )
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -32,7 +30,7 @@ def _build_db_status(name: str, cfg: dict) -> dict[str, Any]:
 
 @router.get("/databases")
 async def list_databases(
-    _admin: dict = Depends(require_role("admin")),
+    _admin: dict = Depends(require_role("admin")),  # noqa: B008
 ) -> dict[str, Any]:
     """List all configured databases and their enabled status."""
     cfg = load_config()
@@ -47,7 +45,7 @@ async def list_databases(
 async def enable_database(
     name: str,
     body: AdminActionRequest,
-    _admin: dict = Depends(require_role("admin")),
+    _admin: dict = Depends(require_role("admin")),  # noqa: B008
 ) -> dict[str, Any]:
     """Enable a database at runtime (marks in config; requires restart for full effect)."""
     cfg = load_config()
@@ -65,7 +63,7 @@ async def enable_database(
 async def disable_database(
     name: str,
     body: AdminActionRequest,
-    _admin: dict = Depends(require_role("admin")),
+    _admin: dict = Depends(require_role("admin")),  # noqa: B008
 ) -> dict[str, Any]:
     """Disable a database at runtime."""
     cfg = load_config()
@@ -81,7 +79,7 @@ async def disable_database(
 
 @router.get("/health")
 async def health_all(
-    _admin: dict = Depends(require_role("admin")),
+    _admin: dict = Depends(require_role("admin")),  # noqa: B008
 ) -> dict[str, Any]:
     """Run health checks against all enabled databases."""
     cfg = load_config()
@@ -128,7 +126,7 @@ async def health_all(
 
 @router.get("/metrics")
 async def system_metrics(
-    _admin: dict = Depends(require_role("admin")),
+    _admin: dict = Depends(require_role("admin")),  # noqa: B008
 ) -> dict[str, Any]:
     """Return lightweight system metrics."""
     import os

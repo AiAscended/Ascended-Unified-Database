@@ -62,7 +62,7 @@ def decode_token(token: str) -> dict[str, Any]:
         ) from exc
 
 
-async def get_current_user(token: str = Depends(_oauth2_scheme)) -> dict[str, Any]:
+async def get_current_user(token: str = Depends(_oauth2_scheme)) -> dict[str, Any]:  # noqa: B008
     payload = decode_token(token)
     subject: str | None = payload.get("sub")
     if not subject:
@@ -76,7 +76,7 @@ async def get_current_user(token: str = Depends(_oauth2_scheme)) -> dict[str, An
 
 def require_role(*required_roles: str):
     """Dependency factory: raises 403 if user lacks any of the required roles."""
-    async def checker(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
+    async def checker(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:  # noqa: B008
         user_roles: list[str] = user.get("roles", [])
         for role in required_roles:
             if role not in user_roles:

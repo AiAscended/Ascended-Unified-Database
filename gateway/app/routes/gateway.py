@@ -14,7 +14,7 @@ router = APIRouter(prefix="/gateway", tags=["gateway"])
 @router.post("/query", response_model=GatewayResponse)
 async def gateway_query(
     request: GatewayRequest,
-    current_user: dict[str, Any] = Depends(get_current_user),
+    current_user: dict[str, Any] = Depends(get_current_user),  # noqa: B008
 ) -> GatewayResponse:
     """Main entry point for all database operations.
 

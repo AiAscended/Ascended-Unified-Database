@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import re
-import os
 from pathlib import Path
-from typing import Any
 
 import yaml
 
 
+_PASS_PATTERN = re.compile(r"(?m)^\s*pass\s*$")
+_EXCEPTION_CLAUSE = re.compile(r"^\s*(except\b|finally\s*:)")
+
 PLACEHOLDER_PATTERNS = [
     re.compile(r"\bTODO\b", re.IGNORECASE),
     re.compile(r"\bFIXME\b", re.IGNORECASE),
-    re.compile(r"(?m)^\s*pass\s*$"),
+    _PASS_PATTERN,
     re.compile(r"\bNotImplemented\b"),
     re.compile(r"<YOUR[_\s].*?>", re.IGNORECASE),
 ]
@@ -29,12 +30,25 @@ SKIP_SECRET_FILES = {".env.example", ".gitignore"}
 SKIP_PLACEHOLDER_FILES = {"rules.py", "validator.py", "config_schema.py", "utils.py"}
 
 
+def _is_pass_in_handler(content: str, match_start: int) -> bool:
+    """Return True if the bare ``pass`` at *match_start* is inside an except/finally block."""
+    lines = content[:match_start].splitlines()
+    for line in reversed(lines):
+        stripped = line.strip()
+        if stripped:
+            return bool(_EXCEPTION_CLAUSE.match(line))
+    return False
+
+
 def check_placeholders(path: Path, content: str) -> list[str]:
     if path.name in SKIP_PLACEHOLDER_FILES:
         return []
     issues = []
     for pattern in PLACEHOLDER_PATTERNS:
         for m in pattern.finditer(content):
+            # bare `pass` is valid inside except/finally blocks; skip those
+            if pattern is _PASS_PATTERN and _is_pass_in_handler(content, m.start()):
+                continue
             line_no = content[: m.start()].count("\n") + 1
             issues.append(f"{path}:{line_no}: placeholder detected: {m.group()!r}")
     return issues

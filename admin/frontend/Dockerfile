@@ -35,6 +35,13 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
+# Run nginx as a non-root user
+RUN addgroup --system nginxgroup && adduser --system --ingroup nginxgroup nginxuser \
+    && chown -R nginxuser:nginxgroup /usr/share/nginx/html /var/cache/nginx /var/log/nginx \
+                                     /etc/nginx/conf.d /etc/nginx/nginx.conf \
+    && touch /var/run/nginx.pid && chown nginxuser:nginxgroup /var/run/nginx.pid
+USER nginxuser
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://localhost:80/ > /dev/null || exit 1
 

@@ -1,10 +1,21 @@
 from __future__ import annotations
 
+import re
+
 import asyncpg
 
 from ..core.config import get_db_config
 
 _pool: asyncpg.Pool | None = None
+
+_VALID_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$")
+
+
+def _validate_identifier(name: str) -> str:
+    """Raise ValueError if *name* is not a safe SQL identifier (prevents SQL injection)."""
+    if not _VALID_IDENTIFIER.match(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return name
 
 
 async def init_pool() -> None:
@@ -57,19 +68,21 @@ async def vector_search(
     filters: dict | None = None,
 ) -> list[dict]:
     pool = _get_pool()
+    safe_table = _validate_identifier(table)
     where_clause = ""
     params: list = [vector, top_k]
     if filters:
         conditions = []
         for i, (col, val) in enumerate(filters.items(), start=3):
-            conditions.append(f"{col} = ${i}")
+            conditions.append(f"{_validate_identifier(col)} = ${i}")
             params.append(val)
         if conditions:
             where_clause = "WHERE " + " AND ".join(conditions)
 
+    # safe_table and filter column names are already validated by _validate_identifier
     sql = (
-        f"SELECT *, embedding <=> $1 AS distance "
-        f"FROM {table} {where_clause} "
+        f"SELECT *, embedding <=> $1 AS distance "  # nosec B608
+        f"FROM {safe_table} {where_clause} "
         f"ORDER BY distance LIMIT $2"
     )
     async with pool.acquire() as conn:

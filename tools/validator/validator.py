@@ -20,7 +20,6 @@ from .utils import (
     print_issues,
     read_file,
     red,
-    yellow,
 )
 
 
