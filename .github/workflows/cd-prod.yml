@@ -9,10 +9,16 @@ concurrency:
   group: cd-prod
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   build-and-push:
     name: Build & Push Prod Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     outputs:
       image_tag: ${{ github.sha }}
     steps:
@@ -40,6 +46,7 @@ jobs:
     name: Manual Approval Gate
     needs: build-and-push
     runs-on: ubuntu-latest
+    permissions: {}
     environment: production
     steps:
       - name: Approved
@@ -49,6 +56,8 @@ jobs:
     name: Blue/Green Deploy to Production
     needs: approval
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Configure kubectl

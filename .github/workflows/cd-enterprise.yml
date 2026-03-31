@@ -9,10 +9,16 @@ concurrency:
   group: cd-enterprise
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   build-and-push:
     name: Build & Push Enterprise Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -45,6 +51,8 @@ jobs:
     name: Canary Rollout (10% traffic)
     needs: build-and-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     environment: enterprise
     steps:
       - uses: actions/checkout@v4

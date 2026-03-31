@@ -9,10 +9,16 @@ concurrency:
   group: cd-dev
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   build-and-push:
     name: Build & Push Dev Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
     steps:
@@ -46,6 +52,8 @@ jobs:
     name: Deploy to Dev K8s
     needs: build-and-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     environment: dev
     steps:
       - uses: actions/checkout@v4
