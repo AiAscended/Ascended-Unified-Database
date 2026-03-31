@@ -1,62 +1,68 @@
+"""
+Configuration schema validator for Ascended Unified Database environment configs.
+Ensures all environment YAML files contain required structure before deployment.
+"""
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
-import yaml
+REQUIRED_TOP_LEVEL_KEYS = [
+    "environment",
+    "databases",
+    "gateway",
+    "security",
+]
 
-REQUIRED_CONFIG_KEYS = {
-    "root": ["environment", "databases", "gateway", "security"],
-    "databases": ["postgres", "redis", "object_storage"],
-    "gateway": ["host", "port", "workers", "log_level"],
-    "security": ["jwt_algorithm", "access_token_expire_minutes"],
-    "postgres": ["enabled", "host", "port", "database"],
-    "redis": ["enabled", "host", "port"],
-    "object_storage": ["enabled", "provider", "bucket"],
-}
+REQUIRED_DATABASE_KEYS = [
+    "postgres",
+    "redis",
+    "object_storage",
+    "qdrant",
+    "graph",
+    "analytics",
+    "streaming",
+]
 
-
-def validate_config_file(path: Path) -> list[str]:
-    issues = []
-    try:
-        with path.open() as fh:
-            doc: dict[str, Any] = yaml.safe_load(fh) or {}
-    except yaml.YAMLError as exc:
-        return [f"{path}: YAML parse error: {exc}"]
-
-    for key in REQUIRED_CONFIG_KEYS["root"]:
-        if key not in doc:
-            issues.append(f"{path}: Missing required top-level key: '{key}'")
-
-    for section in ("gateway", "security"):
-        section_doc = doc.get(section, {}) or {}
-        for key in REQUIRED_CONFIG_KEYS.get(section, []):
-            if key not in section_doc:
-                issues.append(f"{path}: Missing key '{key}' in section '{section}'")
-
-    databases = doc.get("databases", {}) or {}
-    for db_name in REQUIRED_CONFIG_KEYS["databases"]:
-        db_cfg = databases.get(db_name, {}) or {}
-        if not db_cfg:
-            issues.append(f"{path}: Missing database section: '{db_name}'")
-            continue
-        for key in REQUIRED_CONFIG_KEYS.get(db_name, []):
-            if key not in db_cfg:
-                issues.append(f"{path}: Missing key '{key}' in databases.{db_name}")
-
-    valid_environments = {"dev", "prod", "production", "enterprise"}
-    env = doc.get("environment", "")
-    if env not in valid_environments:
-        issues.append(f"{path}: Unknown environment value: '{env}'. Expected one of {valid_environments}.")
-
-    return issues
+VALID_ENVIRONMENTS = {"dev", "production", "enterprise"}
 
 
-def validate_all_configs(root: Path) -> list[str]:
-    issues = []
-    config_dir = root / "configs"
-    if not config_dir.is_dir():
-        return [f"configs/ directory not found at {config_dir}"]
-    for yaml_file in sorted(config_dir.glob("*.yaml")):
-        issues.extend(validate_config_file(yaml_file))
-    return issues
+def validate_config(config: dict[str, Any]) -> list[str]:
+    """Validate an environment config dict against the required schema.
+
+    Returns a list of error strings. Empty list means valid.
+    """
+    errors: list[str] = []
+
+    if not isinstance(config, dict):
+        return ["Config must be a YAML mapping (dict)."]
+
+    for key in REQUIRED_TOP_LEVEL_KEYS:
+        if key not in config:
+            errors.append(f"Missing required top-level key: '{key}'")
+
+    env_name = config.get("environment")
+    if env_name and env_name not in VALID_ENVIRONMENTS:
+        errors.append(
+            f"Invalid environment '{env_name}'. Must be one of: {sorted(VALID_ENVIRONMENTS)}"
+        )
+
+    databases = config.get("databases")
+    if databases is None:
+        errors.append("Missing 'databases' section.")
+    elif not isinstance(databases, dict):
+        errors.append("'databases' must be a YAML mapping.")
+    else:
+        for key in REQUIRED_DATABASE_KEYS:
+            if key not in databases:
+                errors.append(f"Missing database config block: 'databases.{key}'")
+
+    gateway = config.get("gateway")
+    if gateway is not None:
+        if not isinstance(gateway, dict):
+            errors.append("'gateway' must be a YAML mapping.")
+        else:
+            for field in ("host", "port", "workers"):
+                if field not in gateway:
+                    errors.append(f"Missing gateway field: 'gateway.{field}'")
+
+    return errors

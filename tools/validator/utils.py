@@ -1,60 +1,48 @@
+"""
+Utility helpers for the Ascended Validator CLI.
+"""
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 
-ANSI_RED = "\033[91m"
-ANSI_GREEN = "\033[92m"
-ANSI_YELLOW = "\033[93m"
-ANSI_RESET = "\033[0m"
+def print_section(title: str) -> None:
+    """Print a formatted section header to stdout."""
+    width = 60
+    print(f"\n{'=' * width}")
+    print(f"  {title}")
+    print(f"{'=' * width}")
 
 
-def supports_color() -> bool:
-    return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+def print_pass(message: str) -> None:
+    """Print a pass (success) line."""
+    print(f"  ✅  {message}")
 
 
-def red(text: str) -> str:
-    return f"{ANSI_RED}{text}{ANSI_RESET}" if supports_color() else text
+def print_fail(message: str) -> None:
+    """Print a failure line."""
+    print(f"  ❌  {message}", file=sys.stderr)
 
 
-def green(text: str) -> str:
-    return f"{ANSI_GREEN}{text}{ANSI_RESET}" if supports_color() else text
+def collect_files(root: Path, extensions: tuple[str, ...]) -> list[Path]:
+    """Recursively collect files under root matching the given extensions.
+
+    Skips .git, __pycache__, node_modules, .venv, and dist directories.
+    """
+    skip_dirs = {".git", "__pycache__", "node_modules", ".venv", "dist", ".mypy_cache"}
+    results: list[Path] = []
+    for path in root.rglob("*"):
+        if any(part in skip_dirs for part in path.parts):
+            continue
+        if path.is_file() and path.suffix in extensions:
+            results.append(path)
+    return results
 
 
-def yellow(text: str) -> str:
-    return f"{ANSI_YELLOW}{text}{ANSI_RESET}" if supports_color() else text
-
-
-def find_files(root: Path, extensions: list[str], exclude_dirs: set[str] | None = None) -> list[Path]:
-    exclude_dirs = exclude_dirs or {".git", "__pycache__", "node_modules", ".venv", "venv"}
-    result: list[Path] = []
-    for ext in extensions:
-        for p in root.rglob(f"*{ext}"):
-            if not any(part in exclude_dirs for part in p.parts):
-                result.append(p)
-    return sorted(result)
-
-
-def read_file(path: Path) -> str | None:
+def relative(path: Path, root: Path) -> str:
+    """Return path relative to root as a string."""
     try:
-        return path.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError):
-        return None
-
-
-def print_issues(issues: list[str], category: str) -> None:
-    if issues:
-        print(yellow(f"\n[{category}] {len(issues)} issue(s) found:"))
-        for issue in issues:
-            print(f"  {red('✗')} {issue}")
-    else:
-        print(green(f"[{category}] No issues found."))
-
-
-def get_repo_root() -> Path:
-    path = Path(__file__).resolve()
-    for parent in path.parents:
-        if (parent / ".git").exists():
-            return parent
-    return Path.cwd()
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
