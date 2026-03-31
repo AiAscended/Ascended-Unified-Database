@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ascended-db
+
+resources:
+  - ../../base/namespace.yaml
+  - ../../base/gateway-deployment.yaml
+  - ../../base/gateway-service.yaml
+  - ../../databases/postgres-statefulset.yaml
+  - ../../databases/redis-deployment.yaml
+  - ../../databases/minio-deployment.yaml
+  - ../../security/pod-security.yaml
+
+configMapGenerator:
+  - name: gateway-config
+    literals:
+      - ENVIRONMENT=dev
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=ascended_dev
+      - REDIS_HOST=redis
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_BUCKET=ascended-dev
+  - name: postgres-config
+    literals:
+      - POSTGRES_DB=ascended_dev
+
+images:
+  - name: ascended/gateway
+    newTag: dev
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: gateway

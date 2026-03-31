@@ -1,0 +1,14 @@
+apiVersion: v2
+name: postgres
+description: PostgreSQL with pgvector extension for Ascended Unified Database
+type: application
+version: 1.0.0
+appVersion: "16"
+keywords:
+  - postgres
+  - postgresql
+  - pgvector
+  - database
+maintainers:
+  - name: Ascended Team
+    email: platform@ascended.dev

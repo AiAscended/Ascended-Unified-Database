@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ascended-db
+  labels:
+    name: ascended-db
+    app.kubernetes.io/managed-by: kustomize

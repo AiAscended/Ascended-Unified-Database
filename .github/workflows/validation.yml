@@ -1,0 +1,27 @@
+name: Validation
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Run Ascended Validator
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install validator dependencies
+        run: pip install PyYAML==6.0.1
+      - name: Run full validation suite
+        run: python3 -m tools.validator.validator

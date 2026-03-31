@@ -1,0 +1,15 @@
+apiVersion: v2
+name: gateway
+description: Ascended Unified Database Gateway Helm Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - gateway
+  - database
+  - polyglot
+  - fastapi
+home: https://github.com/ascended/unified-database
+maintainers:
+  - name: Ascended Team
+    email: platform@ascended.dev

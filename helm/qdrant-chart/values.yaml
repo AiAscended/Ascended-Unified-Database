@@ -1,0 +1,29 @@
+image:
+  repository: qdrant/qdrant
+  tag: latest
+  pullPolicy: IfNotPresent
+
+storage:
+  size: 20Gi
+  storageClass: ""
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+service:
+  httpPort: 6333
+  grpcPort: 6334
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+
+apiKey:
+  enabled: false
+  secretName: qdrant-secrets
+  secretKey: QDRANT_API_KEY

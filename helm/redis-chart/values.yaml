@@ -1,0 +1,27 @@
+image:
+  repository: redis
+  tag: 7-alpine
+  pullPolicy: IfNotPresent
+
+config:
+  maxmemory: 512mb
+  maxmemoryPolicy: allkeys-lru
+
+storage:
+  size: 5Gi
+  storageClass: ""
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 700Mi
+
+service:
+  port: 6379
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
