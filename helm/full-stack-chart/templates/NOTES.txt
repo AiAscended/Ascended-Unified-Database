@@ -1,0 +1,36 @@
+Thank you for installing {{ .Chart.Name }} v{{ .Chart.Version }}!
+
+Environment: {{ .Values.global.environment }}
+
+Enabled components:
+{{- if .Values.gateway.enabled }}
+  ✅ Gateway          - http://{{ .Release.Name }}-gateway:{{ .Values.gateway.service.port | default 8000 }}
+{{- end }}
+{{- if .Values.postgres.enabled }}
+  ✅ PostgreSQL       - {{ .Release.Name }}-postgres:5432
+{{- end }}
+{{- if .Values.redis.enabled }}
+  ✅ Redis            - {{ .Release.Name }}-redis:6379
+{{- end }}
+{{- if .Values.qdrant.enabled }}
+  ✅ Qdrant           - {{ .Release.Name }}-qdrant:6333
+{{- else }}
+  ⬜ Qdrant           - disabled (vector_search falls back to pgvector)
+{{- end }}
+
+Quick start:
+  kubectl port-forward svc/{{ .Release.Name }}-gateway 8000:8000 -n {{ .Release.Namespace }}
+  curl http://localhost:8000/health
+
+Get a JWT token:
+  curl -X POST http://localhost:8000/auth/token \
+    -H "Content-Type: application/json" \
+    -d '{"username": "admin", "password": "<your-password>"}'
+
+Run a vector search:
+  curl -X POST http://localhost:8000/gateway/query \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -d '{"operation": "vector_search", "dataset": "documents", "vector": [0.1, ...], "top_k": 5}'
+
+Full documentation: https://github.com/ascended/unified-database

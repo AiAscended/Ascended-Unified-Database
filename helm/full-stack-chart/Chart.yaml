@@ -1,0 +1,31 @@
+apiVersion: v2
+name: full-stack
+description: Ascended Unified Database full-stack umbrella Helm chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - polyglot
+  - database
+  - platform
+  - orchestration
+dependencies:
+  - name: gateway
+    version: "1.0.0"
+    repository: "file://../gateway-chart"
+    condition: gateway.enabled
+  - name: postgres
+    version: "1.0.0"
+    repository: "file://../postgres-chart"
+    condition: postgres.enabled
+  - name: redis
+    version: "1.0.0"
+    repository: "file://../redis-chart"
+    condition: redis.enabled
+  - name: qdrant
+    version: "1.0.0"
+    repository: "file://../qdrant-chart"
+    condition: qdrant.enabled
+maintainers:
+  - name: Ascended Team
+    email: platform@ascended.dev

@@ -1,0 +1,31 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: gateway-kafka-scaler
+  namespace: ascended-db
+spec:
+  scaleTargetRef:
+    name: gateway
+  minReplicaCount: 2
+  maxReplicaCount: 20
+  cooldownPeriod: 120
+  pollingInterval: 15
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka.ascended-db.svc.cluster.local:9092
+        consumerGroup: ascended-gateway
+        topic: ascended.tasks
+        lagThreshold: "50"
+        offsetResetPolicy: latest
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: kafka-trigger-auth
+  namespace: ascended-db
+spec:
+  secretTargetRef:
+    - parameter: sasl
+      name: kafka-secrets
+      key: KAFKA_SASL_MECHANISM

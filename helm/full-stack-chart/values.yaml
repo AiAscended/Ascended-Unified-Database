@@ -1,0 +1,78 @@
+global:
+  environment: dev
+  imageRegistry: ""
+
+gateway:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ascended/gateway
+    tag: latest
+  env:
+    ENVIRONMENT: dev
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+
+postgres:
+  enabled: true
+  database:
+    name: ascended_dev
+    user: postgres
+  storage:
+    size: 50Gi
+
+redis:
+  enabled: true
+  config:
+    maxmemory: 512mb
+  storage:
+    size: 5Gi
+
+qdrant:
+  enabled: false
+  storage:
+    size: 20Gi
+
+# Environment overrides
+environments:
+  dev:
+    gateway:
+      replicaCount: 1
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 3
+    postgres:
+      database:
+        name: ascended_dev
+    qdrant:
+      enabled: false
+
+  prod:
+    gateway:
+      replicaCount: 3
+      autoscaling:
+        minReplicas: 3
+        maxReplicas: 10
+    postgres:
+      database:
+        name: ascended_prod
+      storage:
+        size: 100Gi
+    qdrant:
+      enabled: true
+
+  enterprise:
+    gateway:
+      replicaCount: 4
+      autoscaling:
+        minReplicas: 4
+        maxReplicas: 20
+    postgres:
+      database:
+        name: ascended_enterprise
+      storage:
+        size: 200Gi
+    qdrant:
+      enabled: true

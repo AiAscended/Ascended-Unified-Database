@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ascended-db
+
+resources:
+  - ../../base/namespace.yaml
+  - ../../base/gateway-deployment.yaml
+  - ../../base/gateway-service.yaml
+  - ../../base/ingress.yaml
+  - ../../databases/postgres-statefulset.yaml
+  - ../../databases/redis-deployment.yaml
+  - ../../databases/qdrant-deployment.yaml
+  - ../../autoscaling/gateway-hpa.yaml
+  - ../../observability/prometheus.yaml
+  - ../../observability/grafana.yaml
+  - ../../security/network-policies.yaml
+  - ../../security/pod-security.yaml
+
+configMapGenerator:
+  - name: gateway-config
+    literals:
+      - ENVIRONMENT=prod
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=ascended_prod
+      - REDIS_HOST=redis
+      - QDRANT_HOST=qdrant
+  - name: postgres-config
+    literals:
+      - POSTGRES_DB=ascended_prod
+
+images:
+  - name: ascended/gateway
+    newTag: latest
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+      name: gateway

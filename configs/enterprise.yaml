@@ -1,0 +1,46 @@
+environment: enterprise
+
+databases:
+  postgres:
+    enabled: true
+    host: "${POSTGRES_HOST:postgres}"
+    port: 5432
+    database: "${POSTGRES_DB:ascended_enterprise}"
+    vector: true
+  redis:
+    enabled: true
+    host: "${REDIS_HOST:redis}"
+    port: 6379
+  object_storage:
+    enabled: true
+    provider: s3
+    bucket: "${S3_BUCKET:ascended-enterprise}"
+    region: "${AWS_REGION:us-east-1}"
+  qdrant:
+    enabled: true
+    host: "${QDRANT_HOST:qdrant}"
+    port: 6333
+  graph:
+    enabled: true
+    host: "${NEO4J_HOST:neo4j}"
+    port: 7687
+    database: "${NEO4J_DB:neo4j}"
+  analytics:
+    enabled: true
+    host: "${CLICKHOUSE_HOST:clickhouse}"
+    port: 8123
+    database: "${CLICKHOUSE_DB:ascended}"
+  streaming:
+    enabled: true
+    brokers: "${KAFKA_BROKERS:kafka:9092}"
+    topic_prefix: "${KAFKA_TOPIC_PREFIX:ascended}"
+
+gateway:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 8
+  log_level: info
+
+security:
+  jwt_algorithm: HS256
+  access_token_expire_minutes: 15

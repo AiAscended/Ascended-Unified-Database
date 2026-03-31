@@ -1,0 +1,13 @@
+apiVersion: v2
+name: redis
+description: Redis cache for Ascended Unified Database
+type: application
+version: 1.0.0
+appVersion: "7"
+keywords:
+  - redis
+  - cache
+  - session
+maintainers:
+  - name: Ascended Team
+    email: platform@ascended.dev

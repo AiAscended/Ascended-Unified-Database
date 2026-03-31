@@ -1,0 +1,14 @@
+apiVersion: v2
+name: qdrant
+description: Qdrant vector database for Ascended Unified Database
+type: application
+version: 1.0.0
+appVersion: "latest"
+keywords:
+  - qdrant
+  - vector
+  - embedding
+  - similarity-search
+maintainers:
+  - name: Ascended Team
+    email: platform@ascended.dev

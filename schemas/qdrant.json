@@ -1,0 +1,82 @@
+{
+  "collections": {
+    "rag_embeddings": {
+      "description": "RAG document chunk embeddings (OpenAI text-embedding-ada-002, 1536 dims)",
+      "vectors_config": {
+        "size": 1536,
+        "distance": "Cosine",
+        "on_disk": false,
+        "hnsw_config": {
+          "m": 16,
+          "ef_construct": 200,
+          "full_scan_threshold": 10000
+        }
+      },
+      "optimizers_config": {
+        "default_segment_number": 4,
+        "indexing_threshold": 20000
+      },
+      "replication_factor": 1,
+      "write_consistency_factor": 1,
+      "payload_schema": {
+        "document_id": "keyword",
+        "project_id": "keyword",
+        "source": "keyword",
+        "chunk_index": "integer",
+        "created_at": "datetime"
+      }
+    },
+    "agent_memory": {
+      "description": "Agent short/long-term memory embeddings",
+      "vectors_config": {
+        "size": 1536,
+        "distance": "Cosine",
+        "on_disk": false,
+        "hnsw_config": {
+          "m": 16,
+          "ef_construct": 100,
+          "full_scan_threshold": 5000
+        }
+      },
+      "optimizers_config": {
+        "default_segment_number": 2,
+        "indexing_threshold": 10000
+      },
+      "replication_factor": 1,
+      "write_consistency_factor": 1,
+      "payload_schema": {
+        "agent_id": "keyword",
+        "memory_type": "keyword",
+        "session_id": "keyword",
+        "importance": "float",
+        "created_at": "datetime"
+      }
+    },
+    "semantic_indexes": {
+      "description": "General-purpose semantic indexes for arbitrary content",
+      "vectors_config": {
+        "size": 1536,
+        "distance": "Dot",
+        "on_disk": true,
+        "hnsw_config": {
+          "m": 32,
+          "ef_construct": 256,
+          "full_scan_threshold": 50000
+        }
+      },
+      "optimizers_config": {
+        "default_segment_number": 8,
+        "indexing_threshold": 50000
+      },
+      "replication_factor": 1,
+      "write_consistency_factor": 1,
+      "payload_schema": {
+        "content_type": "keyword",
+        "namespace": "keyword",
+        "tags": "keyword",
+        "score": "float",
+        "created_at": "datetime"
+      }
+    }
+  }
+}
